@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+:root {
+    --toche-primary: #04a604;    /* Un rojo/coral vibrante */
+    --toche-secondary: #4ECDC4;  /* Un turquesa fresco */
+    --toche-dark: #2C3E50;       /* Un gris oscuro/azulado */
+    --toche-light: #F7FFF7;      /* Un blanco hueso */
+}
