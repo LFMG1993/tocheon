@@ -28,11 +28,19 @@ export function HomePage() {
         <div className="min-h-screen bg-[var(--toche-light)] p-4 pt-8">
             <div className="max-w-md mx-auto space-y-8">
                 {/* --- Saludo Personalizado --- */}
-                <header>
-                    <h1 className="text-3xl font-bold text-[var(--toche-dark)]">
-                        ¡Hola, {user?.nickname || 'Toche'}!
-                    </h1>
-                    <p className="text-lg text-gray-600">¿Listo para descubrir Cúcuta?</p>
+                <header className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-[var(--toche-dark)]">
+                            ¡Hola, {user?.nickname || 'Toche'}!
+                        </h1>
+                        <p className="text-lg text-gray-600">¿Listo para descubrir Cúcuta?</p>
+                    </div>
+                    <img
+                        src="/logoTocheon.png"
+                        alt="Logo Tocheon"
+                        loading="lazy"
+                        className="h-12 w-auto ml-4"
+                    />
                 </header>
 
                 {/* --- Estado de la Ubicación y Contenido Principal --- */}
