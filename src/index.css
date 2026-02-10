@@ -1,8 +1,40 @@
 @import "tailwindcss";
 
+@theme {
+    /* Mapeamos las variables CSS a utilidades de Tailwind */
+    --color-background: var(--color-background);
+    --color-foreground: var(--color-foreground);
+    --color-card: var(--color-card);
+    --color-card-foreground: var(--color-card-foreground);
+    --color-border: var(--color-border);
+    --color-primary: var(--color-primary);
+    --color-primary-foreground: var(--color-primary-foreground);
+    --color-muted: var(--color-muted);
+    --color-muted-foreground: var(--color-muted-foreground);
+}
+
+/* Definición de variables para el tema CLARO */
 :root {
-    --toche-primary: #04a604;    /* Un rojo/coral vibrante */
-    --toche-secondary: #4ECDC4;  /* Un turquesa fresco */
-    --toche-dark: #2C3E50;       /* Un gris oscuro/azulado */
-    --toche-light: #F7FFF7;      /* Un blanco hueso */
+    --color-background: #F7FFF7;
+    --color-foreground: theme('colors.gray.900');
+    --color-card: theme('colors.white');
+    --color-card-foreground: theme('colors.gray.900');
+    --color-border: theme('colors.gray.200');
+    --color-primary: #4a3084;
+    --color-primary-foreground: theme('colors.white');
+    --color-muted: theme('colors.gray.100');
+    --color-muted-foreground: theme('colors.gray.600');
+}
+
+/* Definición de variables para el tema OSCURO */
+.dark {
+    --color-background: theme('colors.gray.950');
+    --color-foreground: theme('colors.gray.100');
+    --color-card: theme('colors.gray.900');
+    --color-card-foreground: theme('colors.gray.100');
+    --color-border: theme('colors.gray.800');
+    --color-primary: #6d4cba;
+    --color-primary-foreground: theme('colors.white');
+    --color-muted: theme('colors.gray.800');
+    --color-muted-foreground: theme('colors.gray.400');
 }

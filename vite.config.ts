@@ -8,39 +8,48 @@ export default defineConfig({
         react(),
         tailwindcss(),
         VitePWA({
+            registerType: 'prompt',
+            includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+
             devOptions: {
-                // Habilitamos la PWA en el modo de desarrollo
                 enabled: true,
+                type: 'module',
             },
-            // Estrategia de actualización automática del service worker
-            registerType: 'autoUpdate',
-            // Archivos para incluir en el precaching (disponibles offline)
-            includeAssets: ['react.svg'],
-            // Configuración del manifest de la PWA
+
+            strategies: 'injectManifest',
+            srcDir: 'src',
+            filename: 'service-worker.ts',
+
+            injectManifest: {
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+            },
             manifest: {
                 name: 'Toche On',
                 short_name: 'TocheOn',
                 description: 'Tu guía para descubrir lo mejor de Cúcuta.',
-                // Color del tema para la barra de estado del navegador
                 theme_color: '#F7FFF7',
-                // Color de fondo para la pantalla de bienvenida (splash screen)
                 background_color: '#F7FFF7',
-                // Íconos para la pantalla de inicio en diferentes tamaños
+                gcm_sender_id: "103953800507",
                 icons: [
                     {
-                        src: 'react.svg',
+                        src: 'icon-192.png',
                         sizes: '192x192',
-                        type: 'image/svg+xml',
-                        purpose: 'any maskable',
+                        type: 'image/png'
                     },
                     {
-                        src: 'react.svg',
+                        src: 'icon-512.png',
                         sizes: '512x512',
-                        type: 'image/svg+xml',
-                        purpose: 'any maskable',
+                        type: 'image/png'
                     },
-                ],
-            },
+                    {
+                        src: 'icon-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'any maskable'
+                    }
+                ]
+            } as any,
         }),
     ],
 })

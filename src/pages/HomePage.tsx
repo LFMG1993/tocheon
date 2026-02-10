@@ -1,7 +1,7 @@
 import {useAppStore} from '../store/useAppStore';
-import {MapPin, Loader, AlertTriangle, Sparkles, Map} from 'lucide-react';
-import type {PlaceSuggestion} from "../store/suggestionsSlice.ts";
+import {MapPin, Loader, AlertTriangle, Sparkles} from 'lucide-react';
 import {useEffect} from "react";
+import {SuggestionCard} from "../components/homepage/SuggestionCard.tsx";
 
 export function HomePage() {
     // Nos conectamos la store de Zustand
@@ -25,45 +25,41 @@ export function HomePage() {
     }, [coordinates, fetchSuggestions]);
 
     return (
-        <div className="min-h-screen bg-[var(--toche-light)] p-4 pt-8">
+        <div className="min-h-screen bg-background p-4 pt-8">
             <div className="max-w-md mx-auto space-y-8">
                 {/* --- Saludo Personalizado --- */}
-                <header className="flex items-center justify-between">
+                <header className="flex items-center justify-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-[var(--toche-dark)]">
+                        <h1 className="text-3xl font-bold text-foreground text-center">
                             ¡Hola, {user?.nickname || 'Toche'}!
                         </h1>
-                        <p className="text-lg text-gray-600">¿Listo para descubrir Cúcuta?</p>
+                        <p className="text-lg text-muted-foreground">¿Listo para descubrir Cúcuta?</p>
                     </div>
-                    <img
-                        src="/logoTocheon.png"
-                        alt="Logo Tocheon"
-                        loading="lazy"
-                        className="h-12 w-auto ml-4"
-                    />
                 </header>
 
                 {/* --- Estado de la Ubicación y Contenido Principal --- */}
                 <main>
                     {/* Caso 1: Cargando la ubicación */}
                     {loadingLocation && (
-                        <div className="flex flex-col items-center text-center p-8 bg-white rounded-xl shadow-lg">
-                            <Loader className="animate-spin h-10 w-10 text-[var(--toche-primary)] mb-4"/>
-                            <p className="font-semibold text-[var(--toche-dark)]">Buscando tu ubicación...</p>
-                            <p className="text-sm text-gray-500">Esto nos ayudará a encontrar lo mejor cerca de ti.</p>
+                        <div
+                            className="flex flex-col items-center text-center p-8 bg-card rounded-xl shadow-lg border border-border">
+                            <Loader className="animate-spin h-10 w-10 text-primary mb-4"/>
+                            <p className="font-semibold text-foreground">Buscando tu ubicación...</p>
+                            <p className="text-sm text-muted-foreground">Esto nos ayudará a encontrar lo mejor cerca de
+                                ti.</p>
                         </div>
                     )}
 
                     {/* Caso 2: Hubo un error al obtener la ubicación */}
                     {locationError && !loadingLocation && (
                         <div
-                            className="p-6 bg-red-50 border-2 border-red-200 rounded-xl shadow-lg space-y-4 text-center">
+                            className="p-6 bg-red-500/10 border-2 border-red-500/20 rounded-xl shadow-lg space-y-4 text-center">
                             <AlertTriangle className="h-10 w-10 text-red-500 mx-auto"/>
-                            <h3 className="font-bold text-red-800">Error de Ubicación</h3>
-                            <p className="text-sm text-red-700">{locationError}</p>
+                            <h3 className="font-bold text-red-700 dark:text-red-400">Error de Ubicación</h3>
+                            <p className="text-sm text-red-600 dark:text-red-300">{locationError}</p>
                             <button
                                 onClick={() => getGeolocation()}
-                                className="w-full bg-[var(--toche-dark)] text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-opacity-90 transition-colors"
+                                className="w-full bg-primary text-primary-foreground font-bold py-3 px-6 rounded-lg shadow-lg hover:opacity-90 transition-colors"
                             >
                                 Intentar de nuevo
                             </button>
@@ -74,11 +70,12 @@ export function HomePage() {
                     {coordinates && !loadingLocation && (
                         <div className="space-y-6">
                             <div
-                                className="p-4 bg-green-50 border-2 border-green-200 rounded-xl shadow-lg flex items-center space-x-3">
-                                <MapPin className="h-8 w-8 text-green-600 flex-shrink-0"/>
+                                className="p-4 bg-emerald-500/10 border-2 border-emerald-500/20 rounded-xl shadow-lg flex items-center space-x-3">
+                                <MapPin className="h-8 w-8 text-emerald-600 dark:text-emerald-400 flex-shrink-0"/>
                                 <div>
-                                    <p className="font-bold text-green-800">¡Ubicación encontrada!</p>
-                                    <p className="text-xs text-green-700">
+                                    <p className="font-bold text-emerald-800 dark:text-emerald-300">¡Ubicación
+                                        encontrada!</p>
+                                    <p className="text-xs text-emerald-700 dark:text-emerald-400">
                                         Lat: {coordinates.lat.toFixed(4)}, Lon: {coordinates.lon.toFixed(4)}
                                     </p>
                                 </div>
@@ -86,22 +83,23 @@ export function HomePage() {
 
                             {/* Sección de Lugares Cercanos (Placeholder) */}
                             <div className="space-y-4">
-                                <h2 className="text-2xl font-bold text-[var(--toche-dark)] flex items-center">
-                                    <Sparkles className="h-6 w-6 mr-2 text-[var(--toche-secondary)]"/>
+                                <h2 className="text-2xl font-bold text-foreground flex items-center">
+                                    <Sparkles className="h-6 w-6 mr-2 text-primary"/>
                                     Sugerencias para ti
                                 </h2>
                                 {/* Aquí iría un componente que liste lugares */}
                                 {isLoadingSuggestions && (
                                     <div
-                                        className="flex items-center justify-center p-8 bg-white rounded-xl shadow-lg text-gray-500">
+                                        className="flex items-center justify-center p-8 bg-card rounded-xl shadow-lg text-muted-foreground border border-border">
                                         <Loader className="animate-spin h-8 w-8 mr-3"/>
                                         <span>Buscando ideas toches...</span>
                                     </div>
                                 )}
 
                                 {suggestionsError && !isLoadingSuggestions && (
-                                    <div className="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-xl text-center">
-                                        <p className="text-sm text-yellow-700">{suggestionsError}</p>
+                                    <div
+                                        className="p-6 bg-yellow-500/10 border-2 border-yellow-500/20 rounded-xl text-center">
+                                        <p className="text-sm text-yellow-700 dark:text-yellow-400">{suggestionsError}</p>
                                     </div>
                                 )}
 
@@ -118,26 +116,5 @@ export function HomePage() {
                 </main>
             </div>
         </div>
-    );
-}
-
-// Componente para mostrar cada tarjeta de sugerencia
-function SuggestionCard({place}: { place: PlaceSuggestion }) {
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ", Cúcuta")}`;
-
-    return (
-        <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-           className="block bg-white p-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-            <div className="flex justify-between items-start">
-                <div>
-                    <p className="font-bold text-lg text-[var(--toche-dark)]">{place.name}</p>
-                    <p className="text-sm font-semibold text-[var(--toche-secondary)]">{place.category}</p>
-                    <p className="text-sm text-gray-600 mt-2">{place.description}</p>
-                </div>
-                <div className="p-2 bg-blue-100 rounded-full ml-4">
-                    <Map className="h-5 w-5 text-blue-600"/>
-                </div>
-            </div>
-        </a>
     );
 }
