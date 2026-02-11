@@ -9,7 +9,6 @@ import {AboutPage} from "./pages/AboutPage.tsx";
 import {WalletPage} from "./pages/WalletPage.tsx";
 import {MainLayout} from "./components/general/MainLayout.tsx";
 import {useAppStore} from './store/useAppStore';
-import {UpdatePWA} from "./components/general/UpdatePWA.tsx";
 import {InstallPWA} from "./components/general/InstallPWA.tsx";
 import {ThemeProvider} from "./context/ThemeContext.tsx";
 import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
@@ -41,7 +40,6 @@ function App() {
 
     return (
         <>
-            <UpdatePWA/>
             <InstallPWA/>
             <RewardModal/>
             {/* Si ya cargó la autenticación y NO hay usuario, mostramos el modal de bienvenida */}

@@ -22,7 +22,7 @@ export default defineConfig({
 
             injectManifest: {
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+                globPatterns: ['**/*.{js,ts,css,html,ico,png,svg,json}'],
             },
             manifest: {
                 name: 'Toche On',
