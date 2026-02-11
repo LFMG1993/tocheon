@@ -1,27 +1,7 @@
 import type {StateCreator} from "zustand";
 import {getDistanceInKm} from '../utils/geolocation';
-
-export interface PlaceSuggestion {
-    name: string;
-    category: string;
-    description: string;
-}
-
-export interface Coords {
-    lat: number;
-    lon: number
-}
-
-export interface SuggestionsSlice {
-    suggestions: PlaceSuggestion[];
-    isLoadingSuggestions: boolean;
-    suggestionsError: string | null;
-    lastFetchCoordinates: Coords | null;
-    fetchSuggestions: (coords?: Coords) => Promise<void>;
-}
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL;
-const workerUrl = `${baseUrl}/api/suggest`;
+import type {Coords, SuggestionsSlice} from '../types';
+import {fetchSuggestions} from '../services/suggestion.service';
 
 export const createSuggestionsSlice: StateCreator<SuggestionsSlice> = (set, get) => ({
     suggestions: [],
@@ -31,8 +11,11 @@ export const createSuggestionsSlice: StateCreator<SuggestionsSlice> = (set, get)
     fetchSuggestions: async (coords?: Coords) => {
         const {lastFetchCoordinates, suggestions} = get();
 
+        // El servicio requiere latitud y longitud obligatoriamente
+        if (!coords) return;
+
         // Si tenemos coordenadas nuevas, verificamos la distancia
-        if (coords && lastFetchCoordinates) {
+        if (lastFetchCoordinates) {
             const distance = getDistanceInKm(
                 coords.lat,
                 coords.lon,
@@ -40,7 +23,6 @@ export const createSuggestionsSlice: StateCreator<SuggestionsSlice> = (set, get)
                 lastFetchCoordinates.lon
             );
             // Si la distancia es menor a 1km, no hacemos nada. Las sugerencias actuales son válidas.
-            // Si no hay sugerencias, debemos hacer la consulta sin importar la distancia.
             if (distance < 1 && suggestions.length > 0) {
                 return;
             }
@@ -49,17 +31,12 @@ export const createSuggestionsSlice: StateCreator<SuggestionsSlice> = (set, get)
         // Iniciamos la carga, pero No limpiamos las sugerencias anteriores.
         set({isLoadingSuggestions: true, suggestionsError: null});
         try {
-            const response = await fetch(workerUrl, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(coords || {}),
-            });
-            if (!response.ok) throw new Error('La respuesta del servidor no fue exitosa.');
-            const data = await response.json();
+            const data = await fetchSuggestions(coords.lat, coords.lon);
+
             set({
-                suggestions: data as PlaceSuggestion[],
+                suggestions: data,
                 isLoadingSuggestions: false,
-                lastFetchCoordinates: coords || null
+                lastFetchCoordinates: coords
             });
         } catch (error) {
             console.error(error);

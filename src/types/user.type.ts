@@ -8,6 +8,7 @@ export interface Coordinates {
 export interface User {
     uid: string;
     createdAt: Timestamp;
+    isAnonymous?: boolean;
     nickname?: string;
     photoURL?: string;
     firstName?: string;

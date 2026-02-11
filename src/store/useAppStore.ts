@@ -1,12 +1,15 @@
 import {create} from 'zustand';
 import {devtools, persist} from 'zustand/middleware';
-import {type AuthSlice, createAuthSlice} from './authSlice';
-import {type LocationSlice, createLocationSlice} from './locationSlice';
-import {type UiSlice, createUiSlice} from './uiSlice';
-import {type SuggestionsSlice, createSuggestionsSlice} from './suggestionsSlice';
+import {createAuthSlice} from './authSlice';
+import {createLocationSlice} from './locationSlice';
+import {createSuggestionsSlice} from './suggestionsSlice';
+import {createCommunitySlice} from "./eventSlice.ts";
+import {createRewardSlice, type RewardSlice} from "./rewardSlice.ts";
+import type {SuggestionsSlice, AuthSlice, LocationSlice, CommunitySlice} from '../types';
+
 
 // Combinamos los slices en un único estado de la aplicación
-type AppState = AuthSlice & LocationSlice & UiSlice & SuggestionsSlice;
+type AppState = AuthSlice & LocationSlice & SuggestionsSlice & CommunitySlice & RewardSlice;
 
 export const useAppStore = create<AppState>()(
     devtools(
@@ -14,8 +17,9 @@ export const useAppStore = create<AppState>()(
             (...a) => ({
                 ...createAuthSlice(...a),
                 ...createLocationSlice(...a),
-                ...createUiSlice(...a),
                 ...createSuggestionsSlice(...a),
+                ...createCommunitySlice(...a),
+                ...createRewardSlice(...a),
             }),
             {
                 name: 'toche-app-storage', // Un solo nombre para todo el almacenamiento persistente

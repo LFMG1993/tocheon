@@ -15,6 +15,7 @@ export const UpdatePWA = () => {
     });
 
     useEffect(() => {
+        console.log("Estado de actualización PWA - needRefresh:", needRefresh);
         if (needRefresh) {
             // Mostramos un toast persistente y personalizado
             toast.custom((t) => (

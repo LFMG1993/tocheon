@@ -1,5 +1,5 @@
 import {initializeApp} from "firebase/app";
-import {getAuth, setPersistence, browserSessionPersistence} from "firebase/auth";
+import {getAuth} from "firebase/auth";
 import {initializeFirestore, persistentLocalCache} from "firebase/firestore";
 import {getFunctions} from "firebase/functions";
 import {getMessaging} from "firebase/messaging";
@@ -18,11 +18,6 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, {localCache: persistentLocalCache()});
 const functions = getFunctions(app, 'us-central1');
 const messaging = getMessaging(app);
-
-// Establecemos la persistencia de la sesión para que el usuario anónimo no se pierda al cerrar la pestaña.
-setPersistence(auth, browserSessionPersistence).catch((error) => {
-    console.error('Error al establecer la persistencia de Auth:', error);
-});
 
 export {app, auth, db, functions, messaging};
 

@@ -37,3 +37,33 @@ export const fetchGeolocation = (): Promise<Coordinates> => {
         );
     });
 };
+
+/**
+ * Busca lugares utilizando la API de Nominatim (OpenStreetMap).
+ * @param query Texto a buscar (ej: "Parque Santander")
+ * @returns Lista de lugares encontrados con latitud, longitud y nombre.
+ */
+export const searchLocations = async (query: string): Promise<{ lat: number; lon: number; displayName: string }[]> => {
+    try {
+        // Limitamos la búsqueda y pedimos formato JSON, Agregamos addressdetails y limit para ser más específicos
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`, {
+            headers: {
+                'Accept-Language': 'es' // Pedimos resultados en español
+            }
+        });
+
+        if (response.status === 403) throw new Error("El servicio de búsqueda está saturado. Por favor usa la opción de 'Seleccionar en el Mapa'.");
+
+        if (!response.ok) throw new Error("Error al conectar con el servicio de mapas");
+
+        const data = await response.json();
+
+        return data.map((place: any) => ({
+            lat: parseFloat(place.lat),
+            lon: parseFloat(place.lon),
+            displayName: place.display_name
+        }));
+    } catch (error) {
+        throw error;
+    }
+};

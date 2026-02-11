@@ -1,26 +1,17 @@
 import type {StateCreator} from 'zustand';
 import type {User} from '../types';
 import {auth, db} from '../firebase';
-import {onAuthStateChanged, signInAnonymously} from 'firebase/auth';
-import {doc, onSnapshot, serverTimestamp, setDoc, updateDoc} from 'firebase/firestore';
+import {onAuthStateChanged} from 'firebase/auth';
+import {doc, onSnapshot} from 'firebase/firestore';
+import type {AuthSlice} from '../types';
+import {authService} from "../services/auth.service.ts";
 
-export interface AuthSlice {
-    user: User | null;
-    isAuthReady: boolean;
-    signInAnonymouslyAndCreateUser: () => Promise<void>;
-    listenToAuthState: () => () => void;
-    updateUserProfile: (data: Partial<User>) => Promise<void>;
-}
 
 export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
     user: null,
     isAuthReady: false,
     signInAnonymouslyAndCreateUser: async () => {
-        const userCredential = await signInAnonymously(auth);
-        const user = userCredential.user;
-        const userRef = doc(db, 'users', user.uid);
-        // Creamos el documento del usuario en Firestore solo si es la primera vez
-        await setDoc(userRef, {uid: user.uid, createdAt: serverTimestamp()}, {merge: true});
+        await authService.signInAnonymously();
     },
     listenToAuthState: () => {
         // Esta variable mantendrá la función para desuscribirse del listener de Firestore.
@@ -58,8 +49,37 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
         const user = get().user;
         if (!user) throw new Error("No hay un usuario autenticado para actualizar.");
 
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, data);
-        // El listener onSnapshot se encargará de actualizar el estado de la UI automáticamente.
+        await authService.updateProfile(user.uid, data);
+    },
+
+    linkWithGoogle: async () => {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+        const linkedUser = await authService.linkWithGoogle(currentUser);
+        await authService.syncUserAfterLink(linkedUser, get().user);
+    },
+
+    linkWithEmail: async (email, password) => {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
+        const linkedUser = await authService.linkWithEmail(currentUser, email, password);
+        await authService.syncUserAfterLink(linkedUser, get().user);
+    },
+
+    loginWithGoogle: async (rememberMe = false) => {
+        await authService.loginWithGoogle(rememberMe);
+    },
+
+    loginWithEmail: async (email, password, rememberMe = false) => {
+        await authService.loginWithEmail(email, password, rememberMe);
+    },
+
+    registerWithEmail: async (email, password, phone, rememberMe = false) => {
+        await authService.registerWithEmail(email, password, phone, rememberMe);
+    },
+
+    logout: async () => {
+        await authService.logout();
+        set({user: null});
     },
 });
