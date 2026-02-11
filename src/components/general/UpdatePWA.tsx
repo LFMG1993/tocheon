@@ -1,18 +1,42 @@
 import {useRegisterSW} from 'virtual:pwa-register/react';
 import {RefreshCw, AlertCircle} from 'lucide-react';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
 
 export const UpdatePWA = () => {
+    const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
     const {
         needRefresh: [needRefresh],
         updateServiceWorker,
     } = useRegisterSW({
-        onRegistered(_r: ServiceWorkerRegistration | undefined) {
+        onRegistered(r) {
+            console.log('SW Registrado:', r);
+            if (r) setRegistration(r);
         },
         onRegisterError(_error: Error) {
+            console.log('SW Error al registrar:', _error);
         },
     });
+
+    useEffect(() => {
+        const checkForUpdate = () => {
+            if (registration) {
+                console.log('Verificando actualizaciones de PWA...');
+                registration.update();
+            }
+        };
+
+        // 1. Verificar cada vez que el usuario vuelve a la app
+        window.addEventListener('focus', checkForUpdate);
+
+        // 2. Verificar agresivamente cada 1 minuto
+        const interval = setInterval(checkForUpdate, 60 * 1000);
+
+        return () => {
+            window.removeEventListener('focus', checkForUpdate);
+            clearInterval(interval);
+        };
+    }, [registration]);
 
     useEffect(() => {
         console.log("Estado de actualización PWA - needRefresh:", needRefresh);
