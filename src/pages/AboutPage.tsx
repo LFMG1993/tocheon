@@ -8,7 +8,8 @@ export function AboutPage() {
             {/* --- Intro --- */}
             <div className="bg-primary/5 border border-primary/10 rounded-xl p-6 mb-8 text-center">
                 <p className="text-sm text-foreground leading-relaxed">
-                    <span className="font-bold text-primary">TocheOn</span> nace de la alianza de estudiantes apasionados por conectar a las personas con hábitos saludables y tecnología de vanguardia.
+                    <span className="font-bold text-primary">TocheOn</span> nace de la alianza de estudiantes
+                    apasionados por conectar a las personas con hábitos saludables y tecnología de vanguardia.
                 </p>
             </div>
 
@@ -20,7 +21,7 @@ export function AboutPage() {
                     role="Ingeniero de Software en proceso & Arquitecto Cloud"
                     description="Especialista en desarrollo de soluciones escalables, PWAs y arquitecturas serverless."
                     website="https://molink.com.co"
-                    icon={<Code2 className="w-8 h-8 text-indigo-500" />}
+                    icon={<Code2 className="w-8 h-8 text-indigo-500"/>}
                 />
 
                 {/* Creador 2 */}
@@ -29,7 +30,16 @@ export function AboutPage() {
                     role="Ingeniero en Sistemas"
                     description="Experto en crear experiencias de usuario memorables y estrategias digitales."
                     website="https://uxsistemas.com"
-                    icon={<Briefcase className="w-8 h-8 text-rose-500" />}
+                    icon={<Briefcase className="w-8 h-8 text-rose-500"/>}
+                />
+
+                {/* Creador 3 */}
+                <CreatorCard
+                    name="Yesid Vera"
+                    role="Abogado Magister en Derecho Administrativo"
+                    description="Politicas Publicas"
+                    website="https://wa.me/3118967362"
+                    icon={<Briefcase className="w-8 h-8 text-rose-500"/>}
                 />
 
             </div>
@@ -74,7 +84,7 @@ function CreatorCard({name, role, description, website, icon}: any) {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-2.5 bg-foreground text-background rounded-xl font-bold text-sm hover:opacity-90 transition-opacity"
             >
-                <Globe className="w-4 h-4" />
+                <Globe className="w-4 h-4"/>
                 Visitar Portafolio
             </a>
         </motion.div>
