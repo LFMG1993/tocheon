@@ -10,9 +10,7 @@ import {authService} from "../services/auth.service.ts";
 export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
     user: null,
     isAuthReady: false,
-    signInAnonymouslyAndCreateUser: async () => {
-        await authService.signInAnonymously();
-    },
+
     listenToAuthState: () => {
         // Esta variable mantendrá la función para desuscribirse del listener de Firestore.
         let unsubscribeFromSnapshot: (() => void) | null = null;
@@ -74,8 +72,8 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
         await authService.loginWithEmail(email, password, rememberMe);
     },
 
-    registerWithEmail: async (email, password, phone, rememberMe = false) => {
-        await authService.registerWithEmail(email, password, phone, rememberMe);
+    registerWithEmail: async (email, password, phone, nickname, rememberMe = false) => {
+        await authService.registerWithEmail(email, password, phone, nickname, rememberMe);
     },
 
     logout: async () => {
