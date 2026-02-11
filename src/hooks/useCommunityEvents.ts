@@ -21,7 +21,8 @@ export const useCommunityEvents = () => {
     return useQuery({
         queryKey: ['events'],
         queryFn: async () => {
-            const q = query(collection(db, 'events'), orderBy('createdAt', 'desc'));
+            const now = new Date().toISOString();
+            const q = query(collection(db, 'events'), where('date', '>=', now), orderBy('date', 'asc'));
             const snapshot = await getDocs(q);
             return snapshot.docs.map(doc => ({
                 id: doc.id,
