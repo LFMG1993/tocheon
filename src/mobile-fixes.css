@@ -1,0 +1,20 @@
+/*
+  Fix para iOS: Evita que el navegador haga zoom automáticamente
+  cuando se hace foco en un input, select o textarea.
+  iOS hace zoom si el tamaño de fuente es menor a 16px.
+*/
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
+/*
+  Mejora la respuesta táctil, evita el zoom por doble tap
+  y previene el scroll horizontal accidental.
+*/
+html, body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: hidden;
+}

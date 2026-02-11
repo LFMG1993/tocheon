@@ -16,6 +16,7 @@ import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
 import {RewardModal} from "./components/general/RewardModal.tsx";
 import 'leaflet/dist/leaflet.css';
 import './index.css';
+import './mobile-fixes.css';
 
 // Componente wrapper para el tema público
 const PublicThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}) => (
