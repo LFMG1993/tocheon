@@ -6,6 +6,7 @@ import {
     linkWithPopup,
     setPersistence,
     signInWithRedirect,
+    getRedirectResult,
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
@@ -69,6 +70,24 @@ export const authService = {
             const result = await signInWithPopup(auth, provider);
             console.log('[GOOGLE_AUTH] 4. Popup exitoso. Usuario:', result.user.uid);
             return authService.processGoogleResult(result);
+        }
+    },
+
+    handleRedirectResult: async () => {
+        try {
+            console.log('[GOOGLE_AUTH] Verificando resultado de redirect...');
+            const result = await getRedirectResult(auth);
+
+            if (result) {
+                console.log('[GOOGLE_AUTH] Resultado encontrado. Procesando usuario...');
+                // AQUÍ es donde ocurre la magia para móviles:
+                // Creamos el documento en Firestore si no existe
+                return await authService.processGoogleResult(result);
+            }
+            return null;
+        } catch (error) {
+            console.error('[GOOGLE_AUTH] Error en redirect result:', error);
+            throw error;
         }
     },
 

@@ -16,7 +16,7 @@ import {ThemeProvider} from "./context/ThemeContext.tsx";
 import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
 import {RewardModal} from "./components/general/RewardModal.tsx";
 import {Loader} from "lucide-react";
-// import {useCheckGoogleRedirect} from "./hooks/useAuth.ts";
+import {useCheckGoogleRedirect} from "./hooks/useAuth.ts";
 import 'leaflet/dist/leaflet.css';
 import './index.css';
 import './mobile-fixes.css';
@@ -32,7 +32,7 @@ const PublicThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
 function App() {
     const {user, isAuthReady, listenToAuthState, getGeolocation} = useAppStore();
-    // const {data: redirectData, isLoading: isCheckingRedirect} = useCheckGoogleRedirect();
+    useCheckGoogleRedirect();
 
     useEffect(() => {
         const unsubscribe = listenToAuthState();
