@@ -22,7 +22,6 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
                 unsubscribeFromSnapshot();
             }
 
-            set({isAuthReady: true});
             if (user) { // Si el usuario se autentica...
                 const userRef = doc(db, 'users', user.uid);
 
@@ -30,12 +29,16 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
                 unsubscribeFromSnapshot = onSnapshot(userRef, (snapshot) => {
                     if (snapshot.exists()) {
                         // Actualizamos solo el usuario, isAuthReady ya es true.
-                        set({user: snapshot.data() as User});
+                        set({user: snapshot.data() as User, isAuthReady: true});
+                    } else {
+                        // Si el documento no existe (caso raro o borrado manual),
+                        // marcamos listo pero sin usuario, lo que mostrará el WelcomeModal correctamente.
+                        set({user: null, isAuthReady: true});
                     }
                 });
             } else {
                 // Si no hay usuario, simplemente lo establecemos a null.
-                set({user: null});
+                set({user: null, isAuthReady: true});
             }
         });
 
