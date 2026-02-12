@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {Routes, Route} from 'react-router-dom';
 import {HomePage} from './pages/HomePage';
 import {PromotionsPage} from "./pages/PromotionsPage.tsx";
@@ -18,6 +18,7 @@ import {UpdatePWA} from "./components/general/UpdatePWA.tsx";
 import {ThemeProvider} from "./context/ThemeContext.tsx";
 import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
 import {RewardModal} from "./components/general/RewardModal.tsx";
+import {Loader} from "lucide-react";
 import 'leaflet/dist/leaflet.css';
 import './index.css';
 import './mobile-fixes.css';
@@ -33,6 +34,7 @@ const PublicThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
 function App() {
     const {user, isAuthReady, listenToAuthState, getGeolocation, showReward} = useAppStore();
+    const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
 
     useEffect(() => {
         const unsubscribe = listenToAuthState();
@@ -54,15 +56,24 @@ function App() {
                     // Si volvemos de un redirect, procesamos la creación del usuario y recompensas
                     const {rewardGiven} = await authService.processGoogleResult(result);
                     if (rewardGiven) {
-                        showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
+                        setTimeout(() => {
+                            showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
+                        }, 2000);
                     }
                 }
             } catch (error) {
                 console.error("Error en redirect login:", error);
+            } finally {
+                setIsCheckingRedirect(false);
             }
         };
         checkRedirect();
     }, [showReward]);
+
+    if (isCheckingRedirect) {
+        return <div className="min-h-screen flex items-center justify-center bg-background"><Loader
+            className="w-10 h-10 animate-spin text-primary"/></div>;
+    }
 
     return (
         <>

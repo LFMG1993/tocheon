@@ -164,6 +164,14 @@ export const useLoginWithWhatsApp = () => {
         mutationFn: async ({phone, code, rememberMe}: { phone: string, code: string, rememberMe: boolean }) => {
             return authService.loginWithWhatsApp(phone, code, rememberMe);
         },
+        onSuccess: (data) => {
+            if (data && data.rewardGiven) {
+                setTimeout(() => {
+                    const {showReward} = useAppStore.getState();
+                    showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte con WhatsApp.');
+                }, 1500);
+            }
+        },
         onError: (error: any) => {
             console.error(error);
             toast.error(error.message || "Código incorrecto");
