@@ -11,12 +11,25 @@ import {
     browserLocalPersistence,
     browserSessionPersistence,
     getAdditionalUserInfo,
+    signInWithCustomToken,
     type User as FirebaseUser
 } from 'firebase/auth';
 import {doc, setDoc, updateDoc, serverTimestamp} from 'firebase/firestore';
 import {auth, db} from '../firebase';
 import type {User} from '../types';
 import {walletService} from './wallet.service';
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+// Helper para asegurar que el teléfono siempre tenga el formato correcto
+const normalizePhone = (phone: string) => {
+    const clean = phone.replace(/\D/g, '');
+    // Si tiene 10 dígitos y empieza por 3 (celular Colombia), agregamos 57
+    if (clean.length === 10 && clean.startsWith('3')) {
+        return `57${clean}`;
+    }
+    return clean;
+};
 
 export const authService = {
 
@@ -61,7 +74,7 @@ export const authService = {
             rewardGiven = true;
         }
 
-        return { result, rewardGiven };
+        return {result, rewardGiven};
     },
 
     // --- Vinculación y Login (Email) ---
@@ -112,5 +125,57 @@ export const authService = {
         }
 
         await updateDoc(userRef, updates);
+    },
+
+    // WhatsApp Auth
+    sendWhatsAppCode: async (phone: string) => {
+        const finalPhone = normalizePhone(phone);
+        // Llamamos al Worker
+        const response = await fetch(`${API_URL}/api/auth/whatsapp/send`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({telefono: finalPhone})
+        });
+
+        const data = await response.json();
+        if (!data.success) { // Asumiendo que el Worker normaliza la respuesta
+            throw new Error(data.message || "Error al enviar el código");
+        }
+        return data;
+    },
+
+    loginWithWhatsApp: async (phone: string, code: string, rememberMe: boolean) => {
+        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+        const finalPhone = normalizePhone(phone);
+
+        // Llamamos al Worker para verificar
+        const response = await fetch(`${API_URL}/api/auth/whatsapp/verify`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({telefono: finalPhone, code: code})
+        });
+
+        const data = await response.json();
+
+        if (!data.success || !data.token) {
+            throw new Error(data.message || "Código inválido");
+        }
+
+        // EL PASO CLAVE: Iniciar sesión en Firebase con el token que generó el Worker
+        const userCredential = await signInWithCustomToken(auth, data.token);
+        const user = userCredential.user;
+
+        // Aseguramos el documento en Firestore
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, {
+            uid: user.uid,
+            phone: user.phoneNumber || finalPhone, // Guardamos el teléfono
+            createdAt: serverTimestamp(),
+            isAnonymous: false
+        }, {merge: true});
+
+        // Opcional: Dar recompensa si es la primera vez (habría que verificar si el doc existía antes)
+
+        return user;
     }
 };

@@ -144,3 +144,29 @@ export const useLinkWithEmail = () => {
         }
     });
 };
+
+// Hook para Enviar Código WhatsApp
+export const useSendWhatsAppCode = () => {
+    return useMutation({
+        mutationFn: async (phone: string) => {
+            return authService.sendWhatsAppCode(phone);
+        },
+        onError: (error: any) => {
+            console.error(error);
+            toast.error(error.message || "Error al enviar el código");
+        }
+    });
+};
+
+// Hook para Verificar y Login WhatsApp
+export const useLoginWithWhatsApp = () => {
+    return useMutation({
+        mutationFn: async ({phone, code, rememberMe}: { phone: string, code: string, rememberMe: boolean }) => {
+            return authService.loginWithWhatsApp(phone, code, rememberMe);
+        },
+        onError: (error: any) => {
+            console.error(error);
+            toast.error(error.message || "Código incorrecto");
+        }
+    });
+};

@@ -5,11 +5,13 @@ import {HomePage} from './pages/HomePage';
 import {PromotionsPage} from "./pages/PromotionsPage.tsx";
 import {MapPage} from './pages/MapPage.tsx';
 import {ReviewsPage} from "./pages/ReviewsPage.tsx";
+import {Toaster} from 'react-hot-toast';
 import {AboutPage} from "./pages/AboutPage.tsx";
 import {WalletPage} from "./pages/WalletPage.tsx";
 import {MainLayout} from "./components/general/MainLayout.tsx";
 import {useAppStore} from './store/useAppStore';
 import {InstallPWA} from "./components/general/InstallPWA.tsx";
+import {UpdatePWA} from "./components/general/UpdatePWA.tsx";
 import {ThemeProvider} from "./context/ThemeContext.tsx";
 import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
 import {RewardModal} from "./components/general/RewardModal.tsx";
@@ -35,12 +37,16 @@ function App() {
     }, [listenToAuthState]);
 
     useEffect(() => {
-        getGeolocation();
-    }, [getGeolocation]);
+        if (user) {
+            getGeolocation();
+        }
+    }, [getGeolocation, user]);
 
     return (
         <>
+            <Toaster position="top-center" reverseOrder={false} />
             <InstallPWA/>
+            <UpdatePWA/>
             <RewardModal/>
             {/* Si ya cargó la autenticación y NO hay usuario, mostramos el modal de bienvenida */}
             {isAuthReady && !user && <WelcomeModal/>}
