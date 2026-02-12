@@ -54,16 +54,17 @@ export const authService = {
     loginWithGoogle: async (rememberMe: boolean) => {
         console.log('[GOOGLE_AUTH] 1. Iniciando loginWithGoogle. RememberMe:', rememberMe);
         const provider = new GoogleAuthProvider();
-        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        console.log('[GOOGLE_AUTH] 2. Detección de dispositivo:', { isMobile, userAgent: navigator.userAgent });
+        console.log('[GOOGLE_AUTH] 2. Detección de dispositivo:', {isMobile, userAgent: navigator.userAgent});
 
         if (isMobile) {
+            await setPersistence(auth, browserLocalPersistence);
             console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithRedirect...');
             await signInWithRedirect(auth, provider);
-            console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithRedirect...');
+            console.log('[GOOGLE_AUTH] 4. Redirect iniciado.');
             return null;
         } else {
+            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
             console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithPopup...');
             const result = await signInWithPopup(auth, provider);
             console.log('[GOOGLE_AUTH] 4. Popup exitoso. Usuario:', result.user.uid);
