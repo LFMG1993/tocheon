@@ -52,40 +52,59 @@ export const authService = {
     },
 
     loginWithGoogle: async (rememberMe: boolean) => {
+        console.log('[GOOGLE_AUTH] 1. Iniciando loginWithGoogle. RememberMe:', rememberMe);
         const provider = new GoogleAuthProvider();
         await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        console.log('[GOOGLE_AUTH] 2. Detección de dispositivo:', { isMobile, userAgent: navigator.userAgent });
 
         if (isMobile) {
+            console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithRedirect...');
             await signInWithRedirect(auth, provider);
+            console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithRedirect...');
             return null;
         } else {
+            console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithPopup...');
             const result = await signInWithPopup(auth, provider);
+            console.log('[GOOGLE_AUTH] 4. Popup exitoso. Usuario:', result.user.uid);
             return authService.processGoogleResult(result);
         }
     },
 
     // Función para procesar el resultado.
     processGoogleResult: async (result: any) => {
+        console.log('[GOOGLE_AUTH] 5. Procesando resultado de Google (processGoogleResult)...');
         let rewardGiven = false;
 
         // Verificar si es un usuario nuevo para dar el bono
         const details = getAdditionalUserInfo(result);
+        console.log('[GOOGLE_AUTH] 6. Detalles de usuario (isNewUser):', details?.isNewUser);
         if (details?.isNewUser) {
+            console.log('[GOOGLE_AUTH] 7. Usuario NUEVO detectado. Creando documento en Firestore...');
             const user = result.user;
-            await setDoc(doc(db, 'users', user.uid), {
-                uid: user.uid,
-                email: user.email,
-                nickname: user.displayName,
-                photoURL: user.photoURL,
-                createdAt: serverTimestamp(),
-                isAnonymous: false
-            }, {merge: true});
+            try {
+                await setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    email: user.email,
+                    nickname: user.displayName,
+                    photoURL: user.photoURL,
+                    createdAt: serverTimestamp(),
+                    isAnonymous: false
+                }, {merge: true});
+                console.log('[GOOGLE_AUTH] 8. Documento creado. Procesando transacción de billetera...');
 
-            await walletService.processTransaction(user.uid, 5, 'credit', 'reward_signup', 'Bono de Bienvenida');
-            rewardGiven = true;
+                await walletService.processTransaction(user.uid, 5, 'credit', 'reward_signup', 'Bono de Bienvenida');
+                console.log('[GOOGLE_AUTH] 9. Transacción completada.');
+                rewardGiven = true;
+            } catch (error) {
+                console.error('[GOOGLE_AUTH] ERROR CRÍTICO creando usuario/billetera:', error);
+                throw error; // Re-lanzar para que el hook lo capture
+            }
+        } else {
+            console.log('[GOOGLE_AUTH] 7. Usuario EXISTENTE. Saltando creación y bono.');
         }
 
+        console.log('[GOOGLE_AUTH] 10. Proceso finalizado. Retornando datos.');
         return {user: result.user, rewardGiven};
     },
 

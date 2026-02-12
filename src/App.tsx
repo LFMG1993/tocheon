@@ -47,6 +47,7 @@ function App() {
 
     // Efecto para mostrar la recompensa si el hook detectó un registro exitoso
     useEffect(() => {
+        console.log('[GOOGLE_AUTH] App.tsx Effect - RedirectData:', redirectData);
         if (redirectData && redirectData.rewardGiven) {
             setTimeout(() => {
                 showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');

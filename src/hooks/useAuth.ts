@@ -85,9 +85,11 @@ export const useLoginWithGoogle = () => {
     const {showReward} = useAppStore();
     return useMutation({
         mutationFn: async (rememberMe: boolean) => {
+            console.log('[GOOGLE_AUTH] Hook useLoginWithGoogle activado');
             return authService.loginWithGoogle(rememberMe);
         },
         onSuccess: (data) => {
+            console.log('[GOOGLE_AUTH] Hook onSuccess. Data:', data);
             if (data && data.rewardGiven) {
                 showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
             }
@@ -185,10 +187,14 @@ export const useCheckGoogleRedirect = () => {
     return useQuery({
         queryKey: ['google-redirect'],
         queryFn: async () => {
+            console.log('[GOOGLE_AUTH] Hook useCheckGoogleRedirect: Buscando resultado de redirect...');
+
             const result = await getRedirectResult(auth);
             if (result) {
+                console.log('[GOOGLE_AUTH] ¡RESULTADO ENCONTRADO! Usuario:', result.user.uid);
                 return authService.processGoogleResult(result);
             }
+            console.log('[GOOGLE_AUTH] No se encontró resultado de redirect (null).');
             return null;
         },
         retry: false, // Si falla, no reintentar (el redirect se consume)
