@@ -5,6 +5,9 @@ import {HomePage} from './pages/HomePage';
 import {PromotionsPage} from "./pages/PromotionsPage.tsx";
 import {MapPage} from './pages/MapPage.tsx';
 import {ReviewsPage} from "./pages/ReviewsPage.tsx";
+import {getRedirectResult} from "firebase/auth";
+import {auth} from "./firebase.ts";
+import {authService} from "./services/auth.service.ts";
 import {Toaster} from 'react-hot-toast';
 import {AboutPage} from "./pages/AboutPage.tsx";
 import {WalletPage} from "./pages/WalletPage.tsx";
@@ -29,7 +32,7 @@ const PublicThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}
 );
 
 function App() {
-    const {user, isAuthReady, listenToAuthState, getGeolocation} = useAppStore();
+    const {user, isAuthReady, listenToAuthState, getGeolocation, showReward} = useAppStore();
 
     useEffect(() => {
         const unsubscribe = listenToAuthState();
@@ -42,9 +45,28 @@ function App() {
         }
     }, [getGeolocation, user]);
 
+    // Manejar el retorno del Login con Google en móviles
+    useEffect(() => {
+        const checkRedirect = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    // Si volvemos de un redirect, procesamos la creación del usuario y recompensas
+                    const {rewardGiven} = await authService.processGoogleResult(result);
+                    if (rewardGiven) {
+                        showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
+                    }
+                }
+            } catch (error) {
+                console.error("Error en redirect login:", error);
+            }
+        };
+        checkRedirect();
+    }, [showReward]);
+
     return (
         <>
-            <Toaster position="top-center" reverseOrder={false} />
+            <Toaster position="top-center" reverseOrder={false}/>
             <InstallPWA/>
             <UpdatePWA/>
             <RewardModal/>

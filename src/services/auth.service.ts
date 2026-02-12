@@ -5,6 +5,7 @@ import {
     linkWithCredential,
     linkWithPopup,
     setPersistence,
+    signInWithRedirect,
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
@@ -14,7 +15,7 @@ import {
     signInWithCustomToken,
     type User as FirebaseUser
 } from 'firebase/auth';
-import {doc, setDoc, updateDoc, serverTimestamp} from 'firebase/firestore';
+import {doc, setDoc, updateDoc, serverTimestamp, getDoc} from 'firebase/firestore';
 import {auth, db} from '../firebase';
 import type {User} from '../types';
 import {walletService} from './wallet.service';
@@ -53,14 +54,25 @@ export const authService = {
     loginWithGoogle: async (rememberMe: boolean) => {
         const provider = new GoogleAuthProvider();
         await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-        const result = await signInWithPopup(auth, provider);
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            await signInWithRedirect(auth, provider);
+            return null;
+        } else {
+            const result = await signInWithPopup(auth, provider);
+            return authService.processGoogleResult(result);
+        }
+    },
+
+    // Función para procesar el resultado.
+    processGoogleResult: async (result: any) => {
         let rewardGiven = false;
 
         // Verificar si es un usuario nuevo para dar el bono
         const details = getAdditionalUserInfo(result);
         if (details?.isNewUser) {
             const user = result.user;
-            // Aseguramos que el documento exista antes de la transacción
             await setDoc(doc(db, 'users', user.uid), {
                 uid: user.uid,
                 email: user.email,
@@ -74,7 +86,7 @@ export const authService = {
             rewardGiven = true;
         }
 
-        return {result, rewardGiven};
+        return {user: result.user, rewardGiven};
     },
 
     // --- Vinculación y Login (Email) ---
@@ -138,7 +150,7 @@ export const authService = {
         });
 
         const data = await response.json();
-        if (!data.success) { // Asumiendo que el Worker normaliza la respuesta
+        if (!data.success) {
             throw new Error(data.message || "Error al enviar el código");
         }
         return data;
@@ -161,21 +173,37 @@ export const authService = {
             throw new Error(data.message || "Código inválido");
         }
 
-        // EL PASO CLAVE: Iniciar sesión en Firebase con el token que generó el Worker
+        // Iniciar sesión en Firebase con el token que generó el Worker
         const userCredential = await signInWithCustomToken(auth, data.token);
         const user = userCredential.user;
+        let rewardGiven = false;
 
-        // Aseguramos el documento en Firestore
+        // Verificamos si el documento del usuario ya existe en Firestore
         const userRef = doc(db, 'users', user.uid);
-        await setDoc(userRef, {
-            uid: user.uid,
-            phone: user.phoneNumber || finalPhone, // Guardamos el teléfono
-            createdAt: serverTimestamp(),
-            isAnonymous: false
-        }, {merge: true});
+        const userDoc = await getDoc(userRef);
 
-        // Opcional: Dar recompensa si es la primera vez (habría que verificar si el doc existía antes)
+        if (!userDoc.exists()) {
+            // CASO 1: Usuario Nuevo
+            await setDoc(userRef, {
+                uid: user.uid,
+                phone: user.phoneNumber || finalPhone,
+                createdAt: serverTimestamp(),
+                isAnonymous: false
+            });
 
-        return user;
+            // Damos la recompensa solo porque no existía
+            await walletService.processTransaction(user.uid, 5, 'credit', 'reward_signup', 'Bono de Bienvenida (WhatsApp)');
+            rewardGiven = true;
+
+        } else {
+            // CASO 2: Usuario Existente (Login)
+            await setDoc(userRef, {
+                phone: user.phoneNumber || finalPhone,
+                isAnonymous: false
+            }, {merge: true});
+        }
+
+        // Retornamos el objeto con la bandera para que el Hook muestre el confeti
+        return {user, rewardGiven};
     }
 };

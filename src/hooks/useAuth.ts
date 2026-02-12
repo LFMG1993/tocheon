@@ -87,7 +87,7 @@ export const useLoginWithGoogle = () => {
             return authService.loginWithGoogle(rememberMe);
         },
         onSuccess: (data) => {
-            if (data.rewardGiven) {
+            if (data && data.rewardGiven) {
                 showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
             }
         }
