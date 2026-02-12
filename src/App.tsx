@@ -16,7 +16,7 @@ import {ThemeProvider} from "./context/ThemeContext.tsx";
 import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
 import {RewardModal} from "./components/general/RewardModal.tsx";
 import {Loader} from "lucide-react";
-import {useCheckGoogleRedirect} from "./hooks/useAuth.ts";
+// import {useCheckGoogleRedirect} from "./hooks/useAuth.ts";
 import 'leaflet/dist/leaflet.css';
 import './index.css';
 import './mobile-fixes.css';
@@ -31,8 +31,8 @@ const PublicThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}
 );
 
 function App() {
-    const {user, isAuthReady, listenToAuthState, getGeolocation, showReward} = useAppStore();
-    const {data: redirectData, isLoading: isCheckingRedirect} = useCheckGoogleRedirect();
+    const {user, isAuthReady, listenToAuthState, getGeolocation} = useAppStore();
+    // const {data: redirectData, isLoading: isCheckingRedirect} = useCheckGoogleRedirect();
 
     useEffect(() => {
         const unsubscribe = listenToAuthState();
@@ -45,17 +45,7 @@ function App() {
         }
     }, [getGeolocation, user]);
 
-    // Efecto para mostrar la recompensa si el hook detectó un registro exitoso
-    useEffect(() => {
-        console.log('[GOOGLE_AUTH] App.tsx Effect - RedirectData:', redirectData);
-        if (redirectData && redirectData.rewardGiven) {
-            setTimeout(() => {
-                showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
-            }, 2000);
-        }
-    }, [redirectData, showReward]);
-
-    if (isCheckingRedirect) {
+    if (!isAuthReady) {
         return <div className="min-h-screen flex items-center justify-center bg-background"><Loader
             className="w-10 h-10 animate-spin text-primary"/></div>;
     }
