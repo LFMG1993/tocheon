@@ -5,7 +5,7 @@ import {
     linkWithCredential,
     linkWithPopup,
     setPersistence,
-    getRedirectResult,
+    signInWithPopup,
     signInWithEmailAndPassword,
     signOut,
     browserLocalPersistence,
@@ -51,13 +51,16 @@ export const authService = {
     },
 
     loginWithGoogle: async (rememberMe: boolean) => {
-        console.log('[GOOGLE_AUTH] 1. Iniciando loginWithGoogle. RememberMe:', rememberMe);
+        console.log('[GOOGLE_AUTH] 1. Iniciando loginWithGoogle (Popup Mode). RememberMe:', rememberMe);
         const provider = new GoogleAuthProvider();
 
         try {
             await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-            console.log('[GOOGLE_AUTH] Verificando resultado de redirect...');
-            const result = await getRedirectResult(auth, provider);
+            console.log('[GOOGLE_AUTH] 2. Abriendo Popup...');
+
+            const result = await signInWithPopup(auth, provider);
+
+            console.log('[GOOGLE_AUTH] 3. Login exitoso. Procesando usuario...');
             return authService.processGoogleResult(result);
 
         } catch (error: any) {
