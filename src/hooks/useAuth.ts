@@ -1,8 +1,7 @@
-import {useMutation, useQuery} from '@tanstack/react-query';
+import {useMutation} from '@tanstack/react-query';
 import {authService} from '../services/auth.service';
 import {uploadImageToCloudinary} from '../services/cloudinary.service';
 import {useAppStore} from '../store/useAppStore';
-import {getRedirectResult} from "firebase/auth";
 import {auth} from '../firebase';
 import toast from 'react-hot-toast';
 // import {getRedirectResult} from "firebase/auth";
@@ -184,22 +183,22 @@ export const useLoginWithWhatsApp = () => {
 };
 
 // Hook para verificar el resultado del Redirect de Google
-export const useCheckGoogleRedirect = () => {
-    return useQuery({
-        queryKey: ['google-redirect'],
-        queryFn: async () => {
-            console.log('[GOOGLE_AUTH] Hook useCheckGoogleRedirect: Buscando resultado de redirect...');
-
-            const result = await getRedirectResult(auth);
-            if (result) {
-                console.log('[GOOGLE_AUTH] ¡RESULTADO ENCONTRADO! Usuario:', result.user.uid);
-                return authService.processGoogleResult(result);
-            }
-            console.log('[GOOGLE_AUTH] No se encontró resultado de redirect (null).');
-            return null;
-        },
-        retry: false, // Si falla, no reintentar (el redirect se consume)
-        staleTime: Infinity, // El resultado es válido para siempre en esta sesión
-        refetchOnWindowFocus: false, // No volver a comprobar al cambiar de pestaña
-    });
-};
+// export const useCheckGoogleRedirect = () => {
+//     return useQuery({
+//         queryKey: ['google-redirect'],
+//         queryFn: async () => {
+//             console.log('[GOOGLE_AUTH] Hook useCheckGoogleRedirect: Buscando resultado de redirect...');
+//
+//             const result = await getRedirectResult(auth);
+//             if (result) {
+//                 console.log('[GOOGLE_AUTH] ¡RESULTADO ENCONTRADO! Usuario:', result.user.uid);
+//                 return authService.processGoogleResult(result);
+//             }
+//             console.log('[GOOGLE_AUTH] No se encontró resultado de redirect (null).');
+//             return null;
+//         },
+//         retry: false, // Si falla, no reintentar (el redirect se consume)
+//         staleTime: Infinity, // El resultado es válido para siempre en esta sesión
+//         refetchOnWindowFocus: false, // No volver a comprobar al cambiar de pestaña
+//     });
+// };
