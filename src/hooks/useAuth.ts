@@ -1,9 +1,10 @@
-import {useMutation} from '@tanstack/react-query';
+import {useMutation, useQuery} from '@tanstack/react-query';
 import {authService} from '../services/auth.service';
 import {uploadImageToCloudinary} from '../services/cloudinary.service';
 import {useAppStore} from '../store/useAppStore';
 import {auth} from '../firebase';
 import toast from 'react-hot-toast';
+import {getRedirectResult} from "firebase/auth";
 
 // Hook para actualizar datos de texto del perfil
 export const useUpdateProfile = () => {
@@ -176,5 +177,22 @@ export const useLoginWithWhatsApp = () => {
             console.error(error);
             toast.error(error.message || "Código incorrecto");
         }
+    });
+};
+
+// Hook para verificar el resultado del Redirect de Google
+export const useCheckGoogleRedirect = () => {
+    return useQuery({
+        queryKey: ['google-redirect'],
+        queryFn: async () => {
+            const result = await getRedirectResult(auth);
+            if (result) {
+                return authService.processGoogleResult(result);
+            }
+            return null;
+        },
+        retry: false, // Si falla, no reintentar (el redirect se consume)
+        staleTime: Infinity, // El resultado es válido para siempre en esta sesión
+        refetchOnWindowFocus: false, // No volver a comprobar al cambiar de pestaña
     });
 };

@@ -1,5 +1,5 @@
 import {initializeApp} from "firebase/app";
-import {getAuth} from "firebase/auth";
+import {getAuth, setPersistence, browserLocalPersistence} from "firebase/auth";
 import {initializeFirestore, persistentLocalCache} from "firebase/firestore";
 import {getFunctions} from "firebase/functions";
 import {getMessaging} from "firebase/messaging";
@@ -18,6 +18,8 @@ const auth = getAuth(app);
 const db = initializeFirestore(app, {localCache: persistentLocalCache()});
 const functions = getFunctions(app, 'us-central1');
 const messaging = getMessaging(app);
+
+setPersistence(auth, browserLocalPersistence);
 
 export {app, auth, db, functions, messaging};
 

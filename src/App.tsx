@@ -1,13 +1,10 @@
 import * as React from "react";
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {Routes, Route} from 'react-router-dom';
 import {HomePage} from './pages/HomePage';
 import {PromotionsPage} from "./pages/PromotionsPage.tsx";
 import {MapPage} from './pages/MapPage.tsx';
 import {ReviewsPage} from "./pages/ReviewsPage.tsx";
-import {getRedirectResult} from "firebase/auth";
-import {auth} from "./firebase.ts";
-import {authService} from "./services/auth.service.ts";
 import {Toaster} from 'react-hot-toast';
 import {AboutPage} from "./pages/AboutPage.tsx";
 import {WalletPage} from "./pages/WalletPage.tsx";
@@ -19,6 +16,7 @@ import {ThemeProvider} from "./context/ThemeContext.tsx";
 import {WelcomeModal} from "./components/general/WelcomeModal.tsx";
 import {RewardModal} from "./components/general/RewardModal.tsx";
 import {Loader} from "lucide-react";
+import {useCheckGoogleRedirect} from "./hooks/useAuth.ts";
 import 'leaflet/dist/leaflet.css';
 import './index.css';
 import './mobile-fixes.css';
@@ -34,7 +32,7 @@ const PublicThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
 function App() {
     const {user, isAuthReady, listenToAuthState, getGeolocation, showReward} = useAppStore();
-    const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
+    const {data: redirectData, isLoading: isCheckingRedirect} = useCheckGoogleRedirect();
 
     useEffect(() => {
         const unsubscribe = listenToAuthState();
@@ -47,28 +45,14 @@ function App() {
         }
     }, [getGeolocation, user]);
 
-    // Manejar el retorno del Login con Google en móviles
+    // Efecto para mostrar la recompensa si el hook detectó un registro exitoso
     useEffect(() => {
-        const checkRedirect = async () => {
-            try {
-                const result = await getRedirectResult(auth);
-                if (result) {
-                    // Si volvemos de un redirect, procesamos la creación del usuario y recompensas
-                    const {rewardGiven} = await authService.processGoogleResult(result);
-                    if (rewardGiven) {
-                        setTimeout(() => {
-                            showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
-                        }, 2000);
-                    }
-                }
-            } catch (error) {
-                console.error("Error en redirect login:", error);
-            } finally {
-                setIsCheckingRedirect(false);
-            }
-        };
-        checkRedirect();
-    }, [showReward]);
+        if (redirectData && redirectData.rewardGiven) {
+            setTimeout(() => {
+                showReward(5, '¡Bienvenido!', 'Has ganado tus primeros TochCoins por registrarte.');
+            }, 2000);
+        }
+    }, [redirectData, showReward]);
 
     if (isCheckingRedirect) {
         return <div className="min-h-screen flex items-center justify-center bg-background"><Loader
