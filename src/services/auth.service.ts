@@ -5,10 +5,8 @@ import {
     linkWithCredential,
     linkWithPopup,
     setPersistence,
-    signInWithRedirect,
     getRedirectResult,
     signInWithEmailAndPassword,
-    signInWithPopup,
     signOut,
     browserLocalPersistence,
     browserSessionPersistence,
@@ -55,38 +53,20 @@ export const authService = {
     loginWithGoogle: async (rememberMe: boolean) => {
         console.log('[GOOGLE_AUTH] 1. Iniciando loginWithGoogle. RememberMe:', rememberMe);
         const provider = new GoogleAuthProvider();
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        console.log('[GOOGLE_AUTH] 2. Detección de dispositivo:', {isMobile, userAgent: navigator.userAgent});
 
-        if (isMobile) {
-            await setPersistence(auth, browserLocalPersistence);
-            console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithRedirect...');
-            await signInWithRedirect(auth, provider);
-            console.log('[GOOGLE_AUTH] 4. Redirect iniciado.');
-            return null;
-        } else {
-            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
-            console.log('[GOOGLE_AUTH] 3. Ejecutando signInWithPopup...');
-            const result = await signInWithPopup(auth, provider);
-            console.log('[GOOGLE_AUTH] 4. Popup exitoso. Usuario:', result.user.uid);
-            return authService.processGoogleResult(result);
-        }
-    },
-
-    handleRedirectResult: async () => {
         try {
+            await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
             console.log('[GOOGLE_AUTH] Verificando resultado de redirect...');
-            const result = await getRedirectResult(auth);
+            const result = await getRedirectResult(auth, provider);
+            return authService.processGoogleResult(result);
 
-            if (result) {
-                console.log('[GOOGLE_AUTH] Resultado encontrado. Procesando usuario...');
-                // AQUÍ es donde ocurre la magia para móviles:
-                // Creamos el documento en Firestore si no existe
-                return await authService.processGoogleResult(result);
+        } catch (error: any) {
+            // Manejo especial: Si el usuario cierra el popup manualmente
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                console.log('Login cancelado por el usuario');
+                return null;
             }
-            return null;
-        } catch (error) {
-            console.error('[GOOGLE_AUTH] Error en redirect result:', error);
+            console.error('[GOOGLE_AUTH] Error en Popup:', error);
             throw error;
         }
     },
